@@ -106,6 +106,10 @@ const itemColumns = computed<TableColumn[]>(() => [
   },
   { key: 'unit_name', label: t('items.unit'), mobile: 'subtitle' },
   { key: 'price', label: t('items.price'), align: 'end', mobile: 'trailing' },
+  { key: 'unit_name', label: t('items.unit') },
+  { key: 'price', label: t('items.price') },
+  { key: 'wholesale_price', label: t('items.wholesale_price') },
+  { key: 'purchase_price', label: t('items.purchase_price') },
   { key: 'created_at', label: t('items.added_on') },
   ...printedFields.value.map((field) => ({
     key: `custom_field_${field.id}`,
@@ -373,6 +377,20 @@ function removeMultipleItems(): void {
         <template #cell-price="{ row }">
           <BaseFormatMoney
             :amount="row.data.price"
+            :currency="companyStore.selectedCompanyCurrency"
+          />
+        </template>
+
+        <template #cell-wholesale_price="{ row }">
+          <BaseFormatMoney
+            :amount="row.data.wholesale_price"
+            :currency="companyStore.selectedCompanyCurrency"
+          />
+        </template>
+
+        <template #cell-purchase_price="{ row }">
+          <BaseFormatMoney
+            :amount="row.data.purchase_price"
             :currency="companyStore.selectedCompanyCurrency"
           />
         </template>

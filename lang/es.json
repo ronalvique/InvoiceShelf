@@ -268,6 +268,8 @@
     "description": "Descripción",
     "added_on": "Añadido",
     "price": "Precio",
+    "wholesale_price": "Precio al por mayor",
+    "purchase_price": "Precio de compra",
     "date_of_creation": "Fecha de creación",
     "not_selected": "Ningún elemento seleccionado",
     "action": "Acción",

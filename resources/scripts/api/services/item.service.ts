@@ -28,6 +28,8 @@ export interface CreateItemPayload {
   name: string
   description?: string | null
   price: number
+  wholesale_price?: number | null
+  purchase_price?: number | null
   unit_id?: number | null
   taxes?: Array<{ tax_type_id: number }>
 }

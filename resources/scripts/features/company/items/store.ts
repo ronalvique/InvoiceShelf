@@ -19,6 +19,8 @@ export interface ItemForm {
   name: string
   description: string
   price: number
+  wholesale_price?: number | null
+  purchase_price?: number | null
   unit_id: string | number | null
   unit: Unit | null
   taxes: Tax[]
@@ -39,6 +41,8 @@ function createItemStub(): ItemForm {
     name: '',
     description: '',
     price: 0,
+    wholesale_price: 0,
+    purchase_price: 0,
     unit_id: '',
     unit: null,
     taxes: [],

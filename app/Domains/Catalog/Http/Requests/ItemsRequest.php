@@ -39,6 +39,8 @@ class ItemsRequest extends FormRequest
         return [
             'name' => ['required'],
             'price' => ['required'],
+            'wholesale_price' => ['required'],
+            'purchase_price' => ['required'],
             'unit_id' => ['nullable'],
             'description' => ['nullable'],
             ...$this->customFieldRules(),

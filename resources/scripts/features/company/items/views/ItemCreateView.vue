@@ -67,6 +67,20 @@ const price = computed<number>({
   },
 })
 
+const wholesale_price = computed<number>({
+  get: () => (itemStore.currentItem.wholesale_price ?? 0) / 100,
+  set: (value: number) => {
+    itemStore.currentItem.wholesale_price = Math.round(value * 100)
+  },
+})
+
+const purchase_price = computed<number>({
+  get: () => (itemStore.currentItem.purchase_price ?? 0) / 100,
+  set: (value: number) => {
+    itemStore.currentItem.purchase_price = Math.round(value * 100)
+  },
+})
+
 const taxes = computed({
   get: () =>
     itemStore.currentItem.taxes?.map((tax) => {
@@ -262,6 +276,36 @@ async function submitItem(): Promise<void> {
               :content-loading="isFetchingInitialData"
               :invalid="v$.currentItem.name.$error"
               @input="v$.currentItem.name.$touch()"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('items.price')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMoney
+              v-model="price"
+              :content-loading="isFetchingInitialData"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('items.wholesale_price')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMoney
+              v-model="wholesale_price"
+              :content-loading="isFetchingInitialData"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('items.purchase_price')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMoney
+              v-model="purchase_price"
+              :content-loading="isFetchingInitialData"
             />
           </BaseInputGroup>
 
