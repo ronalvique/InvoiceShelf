@@ -38,6 +38,7 @@ class CustomerRequest extends FormRequest
         'tax_id',
         'company_name',
         'contact_name',
+        'customer_type',
         'website',
         'enable_portal',
         'estimate_prefix',
@@ -51,6 +52,7 @@ class CustomerRequest extends FormRequest
         'phone',
         'company_name',
         'contact_name',
+        'customer_type',
         'website',
         'prefix',
         'tax_id',
@@ -97,6 +99,7 @@ class CustomerRequest extends FormRequest
 
         $rules['enable_portal'] = ['boolean'];
         $rules['currency_id'] = ['nullable'];
+        $rules['customer_type'] = ['nullable', Rule::in(['retail', 'wholesale'])];
 
         foreach (['billing', 'shipping'] as $block) {
             foreach (self::ADDRESS_FIELDS as $field) {

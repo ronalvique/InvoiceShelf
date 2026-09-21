@@ -326,6 +326,39 @@ async function submitCustomerData(): Promise<void> {
                 name="tax_id"
               />
             </BaseInputGroup>
+
+            
+            <!-- Customer Type -->
+            <BaseInputGroup
+              :label="$t('customers.customer_type')"
+              :content-loading="isFetchingInitialData"
+              :error="
+                v$.currentCustomer.customer_type?.$error &&
+                v$.currentCustomer.customer_type?.$errors[0]?.$message
+              "
+            >
+              <BaseMultiselect
+                v-model="customerStore.currentCustomer.customer_type"
+                value-prop="id"
+                label="name"
+                track-by="id"
+                :content-loading="isFetchingInitialData"
+                :options="[
+                  { id: 'retail', name: $t('customers.retail') },
+                  { id: 'wholesale', name: $t('customers.wholesale') }
+                ]"
+                :can-deselect="false"
+                :placeholder="$t('customers.select_customer_type')"
+                :invalid="v$.currentCustomer.customer_type?.$error"
+                class="w-full"
+              />
+            </BaseInputGroup>
+              
+             
+            
+            
+            
+
           </BaseInputGrid>
         </div>
 

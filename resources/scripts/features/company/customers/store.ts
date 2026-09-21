@@ -46,6 +46,7 @@ export interface CustomerForm {
   fields: unknown[]
   enable_portal: boolean
   password_added?: boolean
+  customer_type?: string | null
 }
 
 export type CustomerViewData = Partial<Customer>
@@ -79,6 +80,7 @@ function createCustomerStub(): CustomerForm {
     customFields: [],
     fields: [],
     enable_portal: false,
+    customer_type: null,
   }
 }
 

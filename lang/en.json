@@ -416,7 +416,10 @@
     "apply_credit_description": "Choose the available payment credit and invoices to settle. Amounts are only applied when you confirm.",
     "statement_sent": "Statement sent successfully",
     "credit_applied": "Customer credit applied successfully",
-    "statement_email_body": "Please find your account statement attached."
+    "statement_email_body": "Please find your account statement attached.",
+    "customer_type": "Customer Type",
+    "retail": "Retail",
+    "wholesale": "Wholesale"
   },
   "items": {
     "title": "Items",

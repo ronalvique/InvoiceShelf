@@ -31,6 +31,7 @@ export const useGlobalStore = defineStore('global', () => {
   const timeFormats = ref<TimeFormat[]>([])
   const currencies = ref<Currency[]>([])
   const countries = ref<Country[]>([])
+  const customerTypes = ref<Array<{ id: string; name: string }>>([])
   const languages = ref<Array<{ code: string; name: string }>>([])
   const fiscalYears = ref<Array<{ key: string; value: string }>>([])
 
@@ -127,6 +128,21 @@ export const useGlobalStore = defineStore('global', () => {
         adminMode: response.admin_mode === true,
         companyId: response.current_company?.id ?? null,
       })
+
+      // Optional: bootstrap may include customer types enumeration
+      if ((response as Record<string, unknown>).customer_types) {
+        // Expecting an array of { id: string, name: string } or simple strings
+        const raw = (response as Record<string, unknown>).customer_types as any[]
+        customerTypes.value = raw.map((item) =>
+          typeof item === 'string' ? { id: item, name: item } : { id: item.id ?? item.key ?? item.value, name: item.name ?? String(item) }
+        )
+      } else if (!customerTypes.value.length) {
+        // sensible defaults matching the DB enum
+        customerTypes.value = [
+          { id: 'retail', name: 'Retail' },
+          { id: 'wholesale', name: 'Wholesale' },
+        ]
+      }
 
       return response
     } catch (err: unknown) {

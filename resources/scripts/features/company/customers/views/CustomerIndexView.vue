@@ -88,6 +88,7 @@ const customerColumns = computed<TableColumn[]>(() => [
     tdClass: 'font-medium text-heading',
     mobile: 'title',
   },
+  { key: 'customer_type', label: t('customers.customer_type') },
   { key: 'phone', label: t('customers.phone'), mobile: 'subtitle' },
   {
     key: 'account_balance',
@@ -359,6 +360,12 @@ function removeMultipleCustomers(): void {
               class="text-xs text-subtle"
             />
           </router-link>
+        </template>
+
+        <template #cell-customer_type="{ row }">
+          <span>
+              {{ row.data.customer_type ? row.data.customer_type : '-' }}
+          </span>
         </template>
 
         <template #cell-phone="{ row }">

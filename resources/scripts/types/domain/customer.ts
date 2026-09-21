@@ -40,7 +40,8 @@ export interface Customer {
   shipping?: Address
   fields?: CustomFieldValue[]
   company?: Company
-  currency?: Currency
+  currency?: Currency,
+  customer_type?: string | null
 }
 
 export interface CreateCustomerPayload {
@@ -56,5 +57,6 @@ export interface CreateCustomerPayload {
   shipping?: Partial<Address>
   enable_portal?: boolean
   customFields?: CustomFieldValue[]
-  fields?: CustomFieldValue[]
+  fields?: CustomFieldValue[],
+  customer_type?: string | null
 }
