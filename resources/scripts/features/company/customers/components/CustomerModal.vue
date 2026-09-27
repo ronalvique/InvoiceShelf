@@ -89,6 +89,7 @@ const rules = computed(() => ({
       minLength(3)
     ),
   },
+  customer_type: {},
   website: {
     url: helpers.withMessage(t('validation.invalid_url'), url),
   },
@@ -325,6 +326,33 @@ function closeCustomerModal(): void {
                   class="mt-1 md:mt-0"
                 />
               </BaseInputGroup>
+
+              <BaseInputGrid>
+                  <!-- Customer Type -->
+                  <BaseInputGroup
+                    :label="$t('customers.customer_type')">
+                    <BaseMultiselect
+                      v-model="customerStore.currentCustomer.customer_type"
+                      value-prop="id"
+                      label="name"
+                      track-by="id"
+                      :content-loading="isFetchingInitialData"
+                      :options="[
+                        { id: 'retail', name: $t('customers.retail') },
+                        { id: 'wholesale', name: $t('customers.wholesale') }
+                      ]"
+                      :can-deselect="false"
+                      :placeholder="$t('customers.select_customer_type')"
+                      :invalid="v$.customer_type?.$error"
+                      @input="v$.customer_type.$touch()"
+                      class="mt-1 md:mt-0"
+                    />
+                  </BaseInputGroup>
+              </BaseInputGrid>
+              
+
+
+
             </BaseInputGrid>
           </BaseTab>
 

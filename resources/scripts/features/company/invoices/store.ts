@@ -22,6 +22,7 @@ import type { Customer } from '../../../types/domain/customer'
 import type { Note } from '../../../types/domain/note'
 import type { CustomFieldValue } from '../../../types/domain/custom-field'
 import type { DocumentTax, DocumentItem } from '../../shared/document-form/use-document-calculations'
+import { applyCustomerToItemPrice } from '../../shared/document-form/use-document-calculations'
 import { generateClientId } from '../../../utils'
 
 // ----------------------------------------------------------------
@@ -261,6 +262,10 @@ export const useInvoiceStore = defineStore('invoice', {
 
     setInvoiceData(invoice: Invoice): void {
       Object.assign(this.newInvoice, invoice)
+      this.newInvoice.items = this.newInvoice.items.map((item) => applyCustomerToItemPrice(
+        item,
+        this.newInvoice.customer?.customer_type ?? 'retail',
+      ))
 
       if (this.newInvoice.tax_per_item === 'YES') {
         this.newInvoice.items.forEach((item) => {
@@ -443,6 +448,12 @@ export const useInvoiceStore = defineStore('invoice', {
       if (response.data.currency) {
         this.newInvoice.currency_id = (response.data.currency as { id: number }).id
       }
+
+      this.newInvoice.items = this.newInvoice.items.map((item) => applyCustomerToItemPrice(
+        item,
+        this.newInvoice.customer?.customer_type ?? 'retail',
+      ))
+
       return response
     },
 
@@ -464,6 +475,10 @@ export const useInvoiceStore = defineStore('invoice', {
     resetSelectedCustomer(): void {
       this.newInvoice.customer = null
       this.newInvoice.customer_id = null
+      this.newInvoice.items = this.newInvoice.items.map((item) => applyCustomerToItemPrice(
+        item,
+        'retail',
+      ))
     },
 
     addItem(): void {

@@ -40,6 +40,7 @@ export interface CustomerForm {
   website: string | null
   prefix?: string | null
   tax_id?: string | null
+  customer_type?: string | null
   billing: CustomerFormAddress
   shipping: CustomerFormAddress
   customFields: unknown[]

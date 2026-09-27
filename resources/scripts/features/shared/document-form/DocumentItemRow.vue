@@ -415,7 +415,12 @@ import { generateClientId } from '../../../utils'
 import { announce } from '@/scripts/utils/page-focus'
 import type { Currency } from '../../../types/domain/currency'
 import type { TaxType } from '../../../types/domain/tax'
-import type { DocumentItem, DocumentFormData, DocumentTax } from './use-document-calculations'
+import {
+  getCustomerItemPrice,
+  type DocumentItem,
+  type DocumentFormData,
+  type DocumentTax,
+} from './use-document-calculations'
 
 interface Props {
   store: Record<string, unknown> & {
@@ -712,8 +717,22 @@ function onSelectItem(itm: Record<string, unknown>): void {
   props.store.$patch((state: Record<string, unknown>) => {
     const form = state[props.storeProp] as DocumentFormData
     const item = form.items[props.index]
+    const customerType = form.customer?.customer_type as string | null | undefined
+    const retailPrice = Number((itm.price as number | null) ?? 0)
+    const wholesalePrice = Number((itm.wholesale_price as number | null) ?? retailPrice)
+
     item.name = itm.name as string
-    item.price = itm.price as number
+    item.retail_price = retailPrice
+    item.wholesale_price = wholesalePrice
+    item.price = getCustomerItemPrice(
+      {
+        ...item,
+        price: retailPrice,
+        retail_price: retailPrice,
+        wholesale_price: wholesalePrice,
+      },
+      customerType,
+    )
     item.item_id = itm.id as number
     item.description = (itm.description as string | null) ?? null
 
@@ -732,8 +751,6 @@ function onSelectItem(itm: Record<string, unknown>): void {
     if (form.exchange_rate) {
       item.price = Math.round(item.price / form.exchange_rate)
     }
-
-
   })
 
   seedLineCustomFields((itm.fields as CustomFieldItem[]) ?? [])

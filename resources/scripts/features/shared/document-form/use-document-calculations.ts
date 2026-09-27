@@ -158,6 +158,41 @@ export function calcItemSubtotal(price: number, quantity: number): number {
   return Math.round(price * quantity)
 }
 
+export function getCustomerItemPrice(
+  item: Partial<DocumentItem> & Record<string, unknown>,
+  customerType?: string | null,
+): number {
+  const retailPrice = Number(item.retail_price ?? item.price ?? 0)
+  const wholesalePrice = Number(item.wholesale_price ?? retailPrice ?? 0)
+
+  if (customerType === 'wholesale' && wholesalePrice > 0) {
+    return wholesalePrice
+  }
+
+  return retailPrice
+}
+
+export function applyCustomerToItemPrice(
+  item: DocumentItem,
+  customerType?: string | null,
+): DocumentItem {
+  const record = item as DocumentItem & Record<string, unknown>
+  const retailPrice = Number(record.retail_price ?? record.price ?? 0)
+  const wholesalePrice = Number(record.wholesale_price ?? retailPrice ?? 0)
+  const nextPrice = getCustomerItemPrice(record, customerType)
+  const quantity = Number(record.quantity ?? 1)
+  const discountVal = Number(record.discount_val ?? 0)
+
+  record.retail_price = retailPrice
+  record.wholesale_price = wholesalePrice
+  record.price = nextPrice
+
+  record.sub_total = Math.round(nextPrice * quantity)
+  record.total = Math.max(record.sub_total - discountVal, 0)
+
+  return record
+}
+
 /** Calculate item-level discount value */
 export function calcItemDiscountVal(
   subtotal: number,
