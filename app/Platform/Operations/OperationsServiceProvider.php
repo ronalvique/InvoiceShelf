@@ -3,9 +3,11 @@
 namespace App\Platform\Operations;
 
 use App\Platform\Operations\Application\RuntimeConfigurationService;
+use App\Platform\Operations\Console\CatchUp;
 use App\Platform\Operations\Console\InstallInvoiceShelf;
 use App\Platform\Operations\Console\ResetApp;
 use App\Platform\Operations\Console\RetireShippedKey;
+use App\Platform\Operations\Console\SendWelcome;
 use App\Platform\Operations\Console\UpdateCommand;
 use App\Platform\Operations\Installation\Authentication\InstallWizardAuth;
 use App\Platform\Operations\Policies\OperationsAccessPolicy;
@@ -29,9 +31,11 @@ class OperationsServiceProvider extends ServiceProvider
         Gate::define('manage update app', [OperationsAccessPolicy::class, 'manage']);
 
         $this->commands([
+            CatchUp::class,
             InstallInvoiceShelf::class,
             ResetApp::class,
             RetireShippedKey::class,
+            SendWelcome::class,
             UpdateCommand::class,
         ]);
 

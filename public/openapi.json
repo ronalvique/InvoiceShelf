@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "InvoiceShelf API",
-        "version": "3.0.0-alpha.7",
+        "version": "3.0.0-alpha.10",
         "description": "REST API for InvoiceShelf \u2014 open-source invoicing & expense tracking. Authenticate with a Sanctum personal access token (Authorization: Bearer <token>). Company-scoped endpoints additionally require a `company` header carrying the company ID."
     },
     "servers": [
@@ -17,6 +17,70 @@
         }
     ],
     "paths": {
+        "/super-admin/abilities": {
+            "get": {
+                "operationId": "admin.abilities",
+                "tags": [
+                    "Abilities"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "abilities": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "ability": {
+                                                        "type": "string"
+                                                    },
+                                                    "model": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "depends_on": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "owner_only": {
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name",
+                                                    "ability",
+                                                    "model",
+                                                    "depends_on",
+                                                    "owner_only"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "abilities"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/abilities": {
             "get": {
                 "operationId": "company.abilities",
@@ -1432,13 +1496,32 @@
                                                 },
                                                 "login_page_heading": {},
                                                 "login_page_description": {},
-                                                "copyright_text": {}
+                                                "copyright_text": {},
+                                                "powered_by": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "url": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name",
+                                                        "url"
+                                                    ]
+                                                }
                                             },
                                             "required": [
                                                 "login_page_logo",
                                                 "login_page_heading",
                                                 "login_page_description",
-                                                "copyright_text"
+                                                "copyright_text",
+                                                "powered_by"
                                             ]
                                         },
                                         "modules": {
@@ -1484,6 +1567,39 @@
                                                 "portal_password",
                                                 "portal_path"
                                             ]
+                                        },
+                                        "managed_mode": {
+                                            "type": "boolean"
+                                        },
+                                        "managed": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "support_url": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "modules_installable": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "support_url",
+                                                "modules_installable"
+                                            ]
+                                        },
+                                        "source_url": {
+                                            "type": "string"
+                                        },
+                                        "customer_portal_url": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -1494,7 +1610,11 @@
                                         "branding",
                                         "modules",
                                         "demo_mode",
-                                        "demo"
+                                        "demo",
+                                        "managed_mode",
+                                        "managed",
+                                        "source_url",
+                                        "customer_portal_url"
                                     ]
                                 }
                             }
@@ -1769,6 +1889,78 @@
                 }
             }
         },
+        "/super-admin/companies/{company}/roles": {
+            "get": {
+                "operationId": "companies.roles",
+                "summary": "The roles a user can hold in a company, for the super administrator's\nmembership picker: Owner, then the presets, then the company's own",
+                "tags": [
+                    "Companies"
+                ],
+                "parameters": [
+                    {
+                        "name": "company",
+                        "in": "path",
+                        "required": true,
+                        "description": "The company ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "title": {
+                                                        "type": "string"
+                                                    },
+                                                    "preset": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "name",
+                                                    "title",
+                                                    "preset"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/companies": {
             "post": {
                 "operationId": "companies.store",
@@ -2030,6 +2222,61 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/company/mail/drivers": {
+            "get": {
+                "operationId": "companyMailConfiguration.getDrivers",
+                "summary": "The transports a company may choose for its own mail",
+                "tags": [
+                    "CompanyMailConfiguration"
+                ],
+                "parameters": [
+                    {
+                        "name": "company",
+                        "in": "header",
+                        "required": true,
+                        "description": "ID of the company the request operates on (multi-tenancy).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "array",
+                                            "prefixItems": [
+                                                {
+                                                    "type": "string",
+                                                    "const": "smtp"
+                                                }
+                                            ],
+                                            "minItems": 1,
+                                            "maxItems": 1,
+                                            "additionalItems": false
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -4668,7 +4915,7 @@
             },
             "put": {
                 "operationId": "disks.update",
-                "description": "Which of those happens is decided by what the body carries. Credentials\nand a driver together mean a rewrite, and the new blob is proven live\nfirst. Without both, the only thing this endpoint will do is move the\ndefault flag -- and it does that only when the body asks for it.\n\nSystem disks never take the first branch whatever the body says: their\ncredentials point at the two built-in local trees and rewriting them\nwould strand every file already stored there. They fall through to the\nflag, which is the one thing about them that is allowed to change.\n\nThe payload is built from the model as it stands in memory. On the\nset-default branch that is the saved state; on a no-op call it is simply\nthe row as loaded. This is not validated input -- no form request stands\nin front of this route -- so a rewrite accepts whatever name, driver and\ncredential shape the caller sent, and the live check is the only filter.",
+                "description": "Which of those happens is decided by what the body carries. Credentials\nand a driver together mean a rewrite, and the new blob is proven live\nfirst. Without both, the only thing this endpoint will do is move the\ndefault flag -- and it does that only when the body asks for it.\n\nSystem disks never take the first branch whatever the body says: their\ncredentials point at the two built-in local trees and rewriting them\nwould strand every file already stored there. They fall through to the\nflag, which is the one thing about them that is allowed to change.\n\nThe payload is built from the model as it stands in memory. On the\nset-default branch that is the saved state; on a no-op call it is simply\nthe row as loaded. A rewrite is validated like a registration before the\nlive check runs.",
                 "summary": "Rewrite a disk, or just hand it the default flag",
                 "tags": [
                     "Disk"
@@ -4693,6 +4940,15 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateDiskRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "`FileDiskResource`",
@@ -4727,6 +4983,9 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             },
@@ -7672,6 +7931,9 @@
                                                     },
                                                     "bundled": {
                                                         "type": "boolean"
+                                                    },
+                                                    "downloadable": {
+                                                        "type": "string"
                                                     }
                                                 },
                                                 "required": [
@@ -7681,7 +7943,8 @@
                                                     "locales",
                                                     "size",
                                                     "installed",
-                                                    "bundled"
+                                                    "bundled",
+                                                    "downloadable"
                                                 ]
                                             }
                                         }
@@ -7787,6 +8050,29 @@
                                                 "message"
                                             ]
                                         }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "const": "Font downloads are turned off on this server (PDF_FONTS_DOWNLOAD=false)."
+                                        }
+                                    },
+                                    "required": [
+                                        "success",
+                                        "error"
                                     ]
                                 }
                             }
@@ -9831,7 +10117,7 @@
         "/installation/login": {
             "post": {
                 "operationId": "installation.login",
-                "summary": "There is exactly one candidate at this point in the install: the first\nplatform administrator, and the first company attached to them. Any\nbrowser session that got this far is thrown away \u2014 the wizard carries on\nwith a bearer token limited to the wizard ability, and only one such\ntoken is ever live at a time",
+                "summary": "There is exactly one candidate at this point in the install: the first\nplatform administrator, and the first company attached to them. Any\nbrowser session that got this far is thrown away \u2014 the wizard carries on\nwith a bearer token limited to the wizard ability that expires after\ninstaller.wizard_token_ttl minutes, and only one such token is ever live\nat a time",
                 "tags": [
                     "Login"
                 ],
@@ -13956,6 +14242,196 @@
                 }
             }
         },
+        "/super-admin/role-presets": {
+            "get": {
+                "operationId": "role-presets.index",
+                "tags": [
+                    "RolePresets"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `RolePresetResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RolePresetResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "role-presets.store",
+                "tags": [
+                    "RolePresets"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RolePresetRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`RolePresetResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RolePresetResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "/super-admin/role-presets/{rolePreset}": {
+            "put": {
+                "operationId": "role-presets.update",
+                "tags": [
+                    "RolePresets"
+                ],
+                "parameters": [
+                    {
+                        "name": "rolePreset",
+                        "in": "path",
+                        "required": true,
+                        "description": "The role preset ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RolePresetRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`RolePresetResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/RolePresetResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "role-presets.destroy",
+                "tags": [
+                    "RolePresets"
+                ],
+                "parameters": [
+                    {
+                        "name": "rolePreset",
+                        "in": "path",
+                        "required": true,
+                        "description": "The role preset ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "success"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/roles": {
             "get": {
                 "operationId": "roles.index",
@@ -14122,7 +14598,7 @@
             },
             "put": {
                 "operationId": "roles.update",
-                "summary": "Rename a role and rewrite its grants",
+                "summary": "Rename a role and rewrite its grants. The title is derived from the name\nagain, as Bouncer does on create, so the member pickers show the new one",
                 "tags": [
                     "Roles"
                 ],
@@ -16705,6 +17181,52 @@
                         "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
+            },
+            "post": {
+                "operationId": "users.store",
+                "summary": "A new account, in the companies listed (possibly none) with a role in\neach. Without a company it lands on the page for making its first one",
+                "tags": [
+                    "Users"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`UserResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
             }
         },
         "/super-admin/users/{user}": {
@@ -16753,6 +17275,7 @@
             },
             "put": {
                 "operationId": "users.update",
+                "summary": "The account, and when companies are sent, every company it belongs to\nwith its role there; companies left off the list are left",
                 "tags": [
                     "Users"
                 ],
@@ -16772,7 +17295,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/AdminUserUpdateRequest"
+                                "$ref": "#/components/schemas/AdminUserRequest"
                             }
                         }
                     }
@@ -17103,8 +17626,9 @@
                 ],
                 "title": "AdminCompanyUpdateRequest"
             },
-            "AdminUserUpdateRequest": {
+            "AdminUserRequest": {
                 "type": "object",
+                "description": "A user as the super administrator creates or edits one in Administration \u2192\nUsers: the account, whether it is a super administrator, and, when sent,\nevery company it belongs to with the role it holds there.\n\nSomeone who owns a company stays in it as its owner, and nobody can take\naway their own super administrator access.",
                 "properties": {
                     "name": {
                         "type": "string"
@@ -17119,18 +17643,38 @@
                         ]
                     },
                     "password": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
                         "minLength": 8
+                    },
+                    "is_super_admin": {
+                        "type": "boolean"
+                    },
+                    "companies": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "role": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "role"
+                            ]
+                        }
                     }
                 },
                 "required": [
                     "name",
-                    "email"
+                    "email",
+                    "password",
+                    "companies"
                 ],
-                "title": "AdminUserUpdateRequest"
+                "title": "AdminUserRequest"
             },
             "App.Domains.Accounts.Http.Resources.CustomerPortal.CompanyResource": {
                 "type": "object",
@@ -18919,12 +19463,6 @@
                     "owner": {
                         "$ref": "#/components/schemas/UserResource"
                     },
-                    "roles": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RoleResource"
-                        }
-                    },
                     "user_role": {
                         "type": [
                             "string",
@@ -18950,7 +19488,6 @@
                     "slug",
                     "created_at",
                     "updated_at",
-                    "roles",
                     "user_role"
                 ],
                 "title": "CompanyResource"
@@ -20629,13 +21166,20 @@
             },
             "DiskEnvironmentRequest": {
                 "type": "object",
-                "description": "Shapes the body that registers a new storage target.\n\nOnly the label and the driver are asked of every caller. What a driver needs\nbeyond that varies, so the credential rules are picked from the driver named\nin the body and merged underneath the two common ones -- which also means a\ndriver nobody wrote rules for sails through with whatever credential blob it\nwas handed, and is caught later (if at all) by the live credential check the\ncontroller runs.\n\nWhere a driver takes a custom endpoint the server will later sign requests\nagainst, the value has to be a URL that resolves somewhere publicly routable:\nthese credentials are supplied by an administrator and exercised server-side,\nso an endpoint pointed at the loopback interface or a cloud metadata address\nwould turn disk registration into a request forgery primitive.\n\nKNOWN GAP: the S3-compatible driver takes an endpoint too and has no rules\nhere at all, so its endpoint reaches the live check unguarded. Preserved as\nfound.",
+                "description": "Shapes the body that registers a new storage target.\n\nOnly the label and the driver are asked of every caller, and the driver must\nbe one of FileDisk::DRIVERS. What a driver needs beyond that varies, so the\ncredential rules are picked from the driver named in the body and merged\nunderneath the two common ones. A local disk takes only a root, which the\nlive credential check the controller runs then proves writable.\n\nWhere a driver takes a custom endpoint the server will later sign requests\nagainst, the value has to be a URL that resolves somewhere publicly routable:\nthese credentials are supplied by an administrator and exercised server-side,\nso an endpoint pointed at the loopback interface or a cloud metadata address\nwould turn disk registration into a request forgery primitive.",
                 "properties": {
                     "name": {
                         "type": "string"
                     },
                     "driver": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "local",
+                            "s3",
+                            "s3compat",
+                            "doSpaces",
+                            "dropbox"
+                        ]
                     }
                 },
                 "required": [
@@ -23663,6 +24207,110 @@
                 ],
                 "title": "ReplacePaymentAllocationsRequest"
             },
+            "RolePresetRequest": {
+                "type": "object",
+                "description": "A role preset as the super administrator submits it: a title, and ability\nnames from the catalogue (or ones the preset already holds from a module\nthat is switched off).",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "abilities": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "view-customer",
+                                "create-customer",
+                                "edit-customer",
+                                "delete-customer",
+                                "view-item",
+                                "create-item",
+                                "edit-item",
+                                "delete-item",
+                                "view-tax-type",
+                                "create-tax-type",
+                                "edit-tax-type",
+                                "delete-tax-type",
+                                "view-estimate",
+                                "create-estimate",
+                                "edit-estimate",
+                                "delete-estimate",
+                                "send-estimate",
+                                "view-invoice",
+                                "create-invoice",
+                                "edit-invoice",
+                                "delete-invoice",
+                                "send-invoice",
+                                "view-recurring-invoice",
+                                "create-recurring-invoice",
+                                "edit-recurring-invoice",
+                                "delete-recurring-invoice",
+                                "view-payment",
+                                "create-payment",
+                                "edit-payment",
+                                "delete-payment",
+                                "send-payment",
+                                "view-expense",
+                                "create-expense",
+                                "edit-expense",
+                                "delete-expense",
+                                "view-custom-field",
+                                "create-custom-field",
+                                "edit-custom-field",
+                                "delete-custom-field",
+                                "view-financial-reports",
+                                "view-exchange-rate-provider",
+                                "create-exchange-rate-provider",
+                                "edit-exchange-rate-provider",
+                                "delete-exchange-rate-provider",
+                                "dashboard",
+                                "view-all-notes",
+                                "manage-all-notes"
+                            ]
+                        },
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "title",
+                    "abilities"
+                ],
+                "title": "RolePresetRequest"
+            },
+            "RolePresetResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "is_owner": {
+                        "type": "boolean"
+                    },
+                    "role_name": {
+                        "type": "string"
+                    },
+                    "abilities": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "id",
+                    "key",
+                    "title",
+                    "is_owner",
+                    "role_name",
+                    "abilities"
+                ],
+                "title": "RolePresetResource"
+            },
             "RoleRequest": {
                 "type": "object",
                 "description": "Payload rules for defining or renaming a company role.\n\nRole names are unique per company rather than per install, so the uniqueness\ncheck is narrowed by hand to the scope named in the `company` header. A\nrename excuses the role from its own name, but only when the verb is PUT --\nkept as is, an otherwise identical PATCH collides with the stored name.",
@@ -23698,6 +24346,13 @@
                     "level": {
                         "type": "string"
                     },
+                    "preset": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The preset this role is a company's copy of, if any: read only here."
+                    },
                     "formatted_created_at": {
                         "type": "string"
                     },
@@ -23710,6 +24365,7 @@
                     "name",
                     "title",
                     "level",
+                    "preset",
                     "formatted_created_at",
                     "abilities"
                 ],
@@ -24299,6 +24955,29 @@
                     "access"
                 ],
                 "title": "UpdateConnectionRequest"
+            },
+            "UpdateDiskRequest": {
+                "type": "object",
+                "description": "Shapes the body that rewrites a storage target, or only moves the default flag.\n\nA rewrite is validated exactly like a registration. A body that carries no\ndriver is the flag-only call, so the common fields become optional and the\nper-driver credential rules simply find no driver to key on.",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "driver": {
+                        "type": "string",
+                        "enum": [
+                            "local",
+                            "s3",
+                            "s3compat",
+                            "doSpaces",
+                            "dropbox"
+                        ]
+                    },
+                    "set_as_default": {
+                        "type": "boolean"
+                    }
+                },
+                "title": "UpdateDiskRequest"
             },
             "UpdateMcpSettingsRequest": {
                 "type": "object",

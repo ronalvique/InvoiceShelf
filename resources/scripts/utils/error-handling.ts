@@ -33,6 +33,7 @@ export interface NormalizedApiError {
  */
 const ERROR_TRANSLATION_MAP: Record<string, string> = {
   'demo_mode': 'demo.blocked',
+  'managed_mode': 'managed.blocked',
   'This is turned off in the demo.': 'demo.blocked',
   'These credentials do not match our records.': 'errors.login_invalid_credentials',
   'The provided credentials are incorrect.': 'errors.login_invalid_credentials',
@@ -43,6 +44,8 @@ const ERROR_TRANSLATION_MAP: Record<string, string> = {
   'payments_attached': 'settings.payment_modes.payments_attached',
   'expenses_attached': 'settings.payment_modes.expenses_attached',
   'role_attached_to_users': 'settings.roles.already_in_use',
+  'role_preset_in_use': 'settings.role_presets.in_use',
+  'role_preset_locked': 'settings.role_presets.locked',
   'items_attached': 'settings.customization.items.already_in_use',
   'payment_attached_message': 'invoices.payment_attached_message',
   'The email has already been taken.': 'validation.email_already_taken',

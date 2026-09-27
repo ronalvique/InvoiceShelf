@@ -7,6 +7,101 @@ section beneath it is what CI publishes to the updater — see
 The 2.x line has its own CHANGELOG.md on the `2.x` branch. Releases are also on
 GitHub: https://github.com/InvoiceShelf/InvoiceShelf/releases
 
+## 3.0.0-alpha.10 - 2026-09-26
+
+Tenth public alpha of InvoiceShelf 3.0. Owners of a managed install can now add official modules themselves when their host allows it, and every Docker start checks installed modules against the running version.
+
+⚠️ **Pre-release, not for production.** Back up your database before upgrading and use this release for evaluation and testing only.
+
+### Highlights
+
+- **Official modules on managed installs.** When the hosting provider mounts a writable `Modules/` directory, the owner installs, updates and removes official modules from Administration → Modules, as on any other install. Only signed releases from the official marketplace install. Pairing with a marketplace account stays with the provider, and paid modules are not offered there yet. Without a writable `Modules/` directory, a managed install behaves as before. (#893)
+- **`php artisan modules:reconcile`** disables every enabled module whose `module.json` no longer fits the running InvoiceShelf version, module API, PHP version or extensions, and records the reason on the module. The Docker image runs it on every start, before migrations, so an upgrade never boots or migrates a module built for another version. (#893)
+
+### Improvements and fixes
+
+- **Installing, updating or removing a module now clears PHP's opcode cache.** On servers set never to re-read PHP files (`opcache.validate_timestamps=0`), an updated module otherwise kept running its old code until PHP restarted. (#893)
+
+### Upgrade notes
+
+- **Docker:** the image runs `modules:reconcile` when it starts. A module disabled that way keeps its data. Enable it again after installing a release that fits.
+- **Hosting providers:** managed installs now reach install and uninstall whenever `Modules/` is writable. Leave it read-only to keep modules in your hands.
+
+Docker: `invoiceshelf/invoiceshelf:3.0.0-alpha.10` or `ghcr.io/invoiceshelf/invoiceshelf:3.0.0-alpha.10` (also `:next`).
+
+## 3.0.0-alpha.9 - 2026-09-26
+
+Ninth public alpha of InvoiceShelf 3.0. The super administrator can now define role presets that every company gets, and create users and place them in companies from Administration.
+
+⚠️ **Pre-release, not for production.** Back up your database before upgrading and use this release for evaluation and testing only.
+
+### Highlights
+
+- **Role presets.** The super administrator defines roles once in Administration → Settings → Role Presets, and every company gets each one as a role it can assign but not change. Three ship: Owner (every permission), Manager (everything except managing custom fields and exchange-rate providers) and Read only (every view permission and the dashboard). Editing a preset updates it in every company; a preset still held by a member or offered in a pending invitation cannot be deleted. Companies keep their own roles. (#860, #887, #888)
+- **Create users in Administration.** Users → New User creates an account with a password, a super-administrator switch and the companies it belongs to, with a role in each. An existing user's companies and roles are edited the same way. (#859, #889)
+- **One permission grid** for role presets and company roles, with the shortcuts from alpha.8, and a View button that shows a preset's permissions from a company. (#888)
+- `php artisan invoiceshelf:send-welcome --email=...` emails a user a link to set their password, for hosts that install with a random password and hand the instance over later. It fails when the mail is not sent. (#891)
+
+### Improvements and fixes
+
+- **A role with only the view permission for items, payments or expenses could add, rename and delete units, payment modes and expense categories.** Changing them now needs the edit permission, and adding them the create or edit permission. The settings pages hide those actions from members who cannot use them. (#886)
+- A company owner could rename the Owner role or remove its permissions through the API. Owner and the preset roles cannot be edited or deleted from a company, and a company role can no longer be named `owner` or start with `preset:`. (#887)
+- A member removed from a company kept the role they held there, so inviting them again gave it back. Leaving a company now removes it. (#889)
+- A role's title follows its name when it is renamed. (#887)
+
+### Upgrade notes
+
+- **API:** company resources no longer include `roles`. Read a company's roles from the roles endpoint. (#887)
+- The upgrade creates the three presets and gives every existing company its copies; the company's own roles are left alone. `php artisan roles:sync-presets` (optionally `--company=`) repairs a company's copies.
+- **Custom roles that relied on the view-only behaviour above** lose the ability to change units, payment modes and expense categories. Give them the edit permission to keep it.
+
+Docker: `invoiceshelf/invoiceshelf:3.0.0-alpha.9` or `ghcr.io/invoiceshelf/invoiceshelf:3.0.0-alpha.9` (also `:next`).
+
+## 3.0.0-alpha.8 - 2026-09-25
+
+Eighth public alpha of InvoiceShelf 3.0. It closes security issues in the mail, file disk and installer settings, fixes foreign-currency documents on PostgreSQL, and makes the Docker image ready for hosting: it runs on a read-only filesystem, gives the customer portal a host of its own and carries its PDF fonts.
+
+⚠️ **Pre-release, not for production.** Back up your database before upgrading and use this release for evaluation and testing only.
+
+### Security
+
+- **A company owner could make the server connect to internal addresses** through the company mail settings, with an SMTP host or mail URL on a private or reserved network, and use the test mail to probe them. A company mail server must now be a public host. The super administrator keeps the private network, and `MAIL_ALLOWED_PRIVATE_HOSTS` names internal relays any owner may use. GHSA-r234 (#871)
+- Any request could pick the file disk the app wrote to for its whole lifetime with a `file_disk_id` parameter. Only the backup screens choose a disk now, for themselves. (#869)
+- A file disk's saved credentials could set the storage driver and other internal options. The driver comes only from the disk's type, which must be one InvoiceShelf supports, and S3-compatible disks are checked like S3 ones. (#870)
+- The installer's wizard token never expired. It now lasts two hours (`INSTALL_WIZARD_TOKEN_TTL`, in minutes). (#872)
+
+### Highlights
+
+- **Runs on a read-only filesystem.** With `INVOICESHELF_DOTENV=false` the Docker image starts without a `.env` and takes every setting, `APP_KEY` included, from the environment. Only `storage/` and a few temporary mounts need to be writable, and CI now boots the image that way on every change to it. (#879)
+- **The customer portal on a host of its own.** `CUSTOMER_PORTAL_URL` (and `CUSTOMER_PORTAL_HOSTS` for more than one) moves every link sent to a customer there. That host serves the portal and public documents only, and customer pages opened on the app host move to it. (#881)
+- **Managed mode for hosting providers.** `INVOICESHELF_MANAGED=true` hides the storage, backup, PDF, server mail and module install settings from the install's owner, who then brings only their own SMTP server, and sends platform mail from the platform address with the user as Reply-To. (#875, #878)
+- **PDF fonts built into an image.** `php artisan pdf:fonts:install --all --path=...` downloads the language font packages ahead of time, `PDF_FONTS_PATH` points at them and `PDF_FONTS_DOWNLOAD=false` stops downloads while the app runs. Every font now comes from a fixed release or commit and is checked against its SHA-256. (#882)
+- **Headless installs** can give the administrator a random password and email them a link to set their own (`--admin-password-random --send-welcome`), read the password from a file (`INSTALL_ADMIN_PASSWORD_FILE`), and set the date format and fiscal year. (#876)
+
+### Improvements and fixes
+
+- **Owners can add a member with a password**, next to Invite member on the Members page, for a server that sends no mail or a colleague who should not wait for an invitation. (#859, #883)
+- **Building a company role takes a few clicks:** View Only next to Select All and None, and All, View and None on each module, with the permissions they depend on ticked for you. Select All no longer adds every permission twice. (#860, #884)
+- **On PostgreSQL, saving an estimate, invoice or expense in a foreign currency failed** whenever the exchange rate had decimals, with `invalid input syntax for type bigint`. Amounts converted to the company currency are now rounded to whole cents before they are stored, everywhere they are written: documents, lines, taxes, copies, recurring invoices, payments and balances. The exchange rate keeps its decimals. (#798, #862, #864)
+- The exchange-rate update for existing documents, which runs after the company currency changes, took each document's discount from its subtotal and converted taxes twice. It now converts each amount from its own value. (#862)
+- **Installing or removing a module from the marketplace could fail at the last step**, while clearing caches, after the module had been downloaded and verified. (#858)
+- **The customer picker on invoice, estimate and recurring invoice forms logged an error in the browser console**, and keyboard focus did not follow a pick or a clear: it now moves to the customer card after a pick and back to the picker after Deselect. (#865)
+- Overdue invoices and expired estimates are flagged even when the server was down at midnight: `invoiceshelf:catch-up` runs the day's checks once if they have not run, hourly and when the Docker image starts. (#877, #879)
+- SQLite waits up to five seconds for a lock instead of failing with "database is locked" (`DB_BUSY_TIMEOUT`), and `DB_JOURNAL_MODE` and `DB_SYNCHRONOUS` can turn on WAL. (#874)
+- Saving company SMTP settings with the optional fields left blank no longer fails. (#871)
+- The company mail settings no longer fail to load their list of mail drivers for a company owner who is not the super administrator. (#878)
+- The Settings link in the administration area no longer leads to a missing page. (#875)
+- A PDF font package that cannot be downloaded no longer stops the document: it is logged and the PDF uses Noto Sans. (#882)
+- Sign-in pages, public documents and document emails take their "Powered by" line from one setting (`INVOICESHELF_POWERED_BY`, `_NAME`, `_URL`), and the account menus link to the source code of the running version (`INVOICESHELF_SOURCE_URL`). (#880)
+
+### Upgrade notes
+
+- Documents saved before this release keep the company-currency amounts they were stored with. Saving a document again recalculates them.
+- **Company mail on an internal address:** a company mail server on a private address that an owner who is not the super administrator saved before this release keeps sending, but its test mail is refused and saving its settings asks for a public host. List the relay in `MAIL_ALLOWED_PRIVATE_HOSTS` to keep it.
+- **Docker:** the image now sets `CONTAINERIZED=true` in its environment, runs `invoiceshelf:catch-up` when it starts, and refuses to start on the key InvoiceShelf used to ship when `INVOICESHELF_MANAGED` is on or there is no `.env`.
+
+Docker: `invoiceshelf/invoiceshelf:3.0.0-alpha.8` or `ghcr.io/invoiceshelf/invoiceshelf:3.0.0-alpha.8` (also `:next`).
+
 ## 3.0.0-alpha.7 - 2026-09-24
 
 Seventh public alpha of InvoiceShelf 3.0, with two fixes.
