@@ -108,6 +108,7 @@ const ERROR_TRANSLATION_MAP: Record<string, string> = {
   'module_runtime_missing': 'modules.runtime_missing',
   'request_limit_met': 'errors.request_limit_met',
   'address_incomplete': 'errors.address_incomplete',
+  'recurrence_frequency_invalid': 'errors.recurrence_frequency_invalid',
   'invalid_address': 'errors.invalid_address',
   'Email could not be sent to this email address.': 'errors.email_could_not_be_sent',
 }
@@ -204,5 +205,13 @@ export function extractValidationErrors(err: unknown): Record<string, string[]> 
  * @returns The translation key if known, or null if not mapped
  */
 export function getErrorTranslationKey(errorMessage: string): string | null {
-  return ERROR_TRANSLATION_MAP[errorMessage] ?? null
+  if (ERROR_TRANSLATION_MAP[errorMessage]) {
+    return ERROR_TRANSLATION_MAP[errorMessage]
+  }
+
+  // Purchasing and recurring invoices send codes that name their own key
+  // under `errors`.
+  return /^(purchase|recurring_invoice)_[a-z_]+$/.test(errorMessage)
+    ? `errors.${errorMessage}`
+    : null
 }
